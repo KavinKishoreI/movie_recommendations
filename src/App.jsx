@@ -1,92 +1,131 @@
-import React, {useEffect} from 'react'
-import Header from './header.jsx'
-import Searcher from './search.jsx'
-
-
+import React, { useEffect } from "react";
+import Searcher from "./search.jsx";
 
 const Headers = () => {
-    const [search , setSearch] = React.useState('');
-
-    const [errorstring , setError] = React.useState('');
-
-    const [movies , setMovies] = React.useState([]);
-
+    const [search, setSearch] = React.useState("");
+    const [errorstring, setError] = React.useState("");
+    const [movies, setMovies] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
 
-    const url = "https://api.themoviedb.org/3/discover/movie";
-
+    const API_BASE = "https://api.themoviedb.org/3";
     const options = {
-        method: 'GET',
+        method: "GET",
         headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_TMDB_API_KEY}`
-        }
-    }
-    const req = async () =>{
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_KEY}`,
+        },
+    };
+
+    const fetchMovies = async (query = "") => {
         try {
             setLoading(true);
             setError("");
 
+            let url = "";
+            if (query.trim() === "") {
+                url = `${API_BASE}/discover/movie?include_adult=false&page=1`;
+            } else {
+                const keywords = query.trim().split(/\s+/).join("+"); // OR logic
+                url = `${API_BASE}/search/movie?query=${keywords}&include_adult=false&page=1`;
+            }
+
             const response = await fetch(url, options);
-            if ( !response.ok ) {
+            if (!response.ok) {
                 throw Error(`Could not find movies for ${url}`);
             }
+
             const json_response = await response.json();
-            if ( json_response.Response === "False" ) {
-                setError("Error in fetching movies");
+            let results = json_response.results || [];
+
+            if (query.trim() !== "") {
+                const words = query.toLowerCase().split(/\s+/);
+                results = results.filter((movie) =>
+                    words.every(
+                        (w) =>
+                            movie.title?.toLowerCase().includes(w) ||
+                            movie.overview?.toLowerCase().includes(w)
+                    )
+                );
+            }
+
+            if (results.length === 0) {
+                setError("No movies found");
                 setMovies([]);
+            } else {
+                setMovies(results);
             }
-            else{
-                setMovies(json_response.results);
-                console.log(json_response.results);
-            }
-        }
-        catch(error){
+        } catch (error) {
             setError("Error in fetching movies");
-        }
-        finally{
+        } finally {
             setLoading(false);
         }
-    }
+    };
+
     useEffect(() => {
-        req().then( () => {
-            console.log(movies.results);
-        });
-    },[]);
+        fetchMovies();
+    }, []);
+
+    useEffect(() => {
+        if (search === "") {
+            fetchMovies();
+        } else {
+            const timeout = setTimeout(() => {
+                fetchMovies(search);
+            }, 600);
+            return () => clearTimeout(timeout);
+        }
+    }, [search]);
 
     return (
-        <>
-            <main>
-                <div className="pattern" />
-                <div className="wrapper">
-                    <header >
-                        <img src="./hero.png" />
-                        <h1> <span className="text-gradient" >Find Movies</span>  YOU like just skip the hassle  </h1>
-                        <Searcher searchItem = {search} setSearch = {setSearch} />
+        <main>
+            <div className="pattern" />
+            <div className="wrapper">
+                <header>
+                    <img src="./hero.png" alt="Hero" />
+                    <h1>
+                        <span className="text-gradient">Find Movies</span> YOU LOVE WATCHINGq
 
-                        {loading ? <p className="text-white" > Loading movies for you </p>
-                        : errorstring ? <p className="text-white" > Error occurred</p>
-                        :(
+                    </h1>
+                    <Searcher searchItem={search} setSearch={setSearch} />
+                    {loading ? (
+                        <p className="text-white mt-10">Loading movies for you...</p>
+                    ) : errorstring ? (
+                        <p className="text-white mt-10">{errorstring}</p>
+                    ) : (
+                        <div className="all-movies mt-10">
                             <ul>
-                                {movies.map(movie => (
-                                    <>
-                                        <img alt='att' src = {url + movie.poster_path} />
-                                        <p className="text-white" key={movie.id}> {movie.title}</p>
-                                    </>
-
-                                )) }
+                                {movies.map((movie) => (
+                                    <li key={movie.id} className="movie-card">
+                                        <img
+                                            src={
+                                                movie.poster_path
+                                                    ? "https://image.tmdb.org/t/p/w500" +
+                                                    movie.poster_path
+                                                    : "./no-poster.png"
+                                            }
+                                            alt={movie.title}
+                                        />
+                                        <h3>{movie.title}</h3>
+                                        <div className="content">
+                                            <div className="rating">
+                                                <img src="./star.svg" alt="rating" />
+                                                <p>{movie.vote_average.toFixed(1)}</p>
+                                            </div>
+                                            <span className="year">
+                        {movie.release_date?.split("-")[0]}
+                      </span>
+                                            <span className="lang">{movie.original_language}</span>
+                                        </div>
+                                    </li>
+                                ))}
                             </ul>
-                                )}
-                    </header>
+                        </div>
+                    )}
+                </header>
+            </div>
+        </main>
+    );
+};
 
-                </div>
-            </main>
-
-        </>
-
-
-    )
-
-}
 export default Headers;
