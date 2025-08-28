@@ -1,12 +1,37 @@
-# React + Vite
+# 🎬 Movie Finder App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple React application that helps you discover and search for movies using [The Movie Database (TMDb)](https://www.themoviedb.org/) API.  
+You can search movies by title or keywords, view posters, ratings, release year, and language in an elegant UI.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
+- Search movies by keywords (supports OR logic between multiple words).
+- Browse trending/discovered movies by default.
+- View movie details such as:
+  - Poster
+  - Title
+  - Rating
+  - Release Year
+  - Original Language
+- Smooth search with debounced input.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠️ Getting Started
+
+Run the following commands in your terminal:
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd <your-repo-folder>
+
+# Install dependencies
+npm install
+
+# Create environment file with your TMDb API key
+echo "VITE_TMDB_API_KEY=your_api_key_here" > .env.local
+
+# Start development server
+npm run dev
