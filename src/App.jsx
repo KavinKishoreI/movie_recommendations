@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import Searcher from "./search.jsx";
-
+import Spinner from "./spinner.jsx";
 const Headers = () => {
     const [search, setSearch] = React.useState("");
     const [errorstring, setError] = React.useState("");
@@ -64,6 +64,7 @@ const Headers = () => {
 
     useEffect(() => {
         fetchMovies();
+
     }, []);
 
     useEffect(() => {
@@ -84,12 +85,12 @@ const Headers = () => {
                 <header>
                     <img src="./hero.png" alt="Hero" />
                     <h1>
-                        <span className="text-gradient">Find Movies</span> YOU LOVE WATCHINGq
+                        <span className="text-gradient">Find Movies</span> YOU LOVE WATCHING
 
                     </h1>
                     <Searcher searchItem={search} setSearch={setSearch} />
                     {loading ? (
-                        <p className="text-white mt-10">Loading movies for you...</p>
+                        <Spinner />
                     ) : errorstring ? (
                         <p className="text-white mt-10">{errorstring}</p>
                     ) : (
