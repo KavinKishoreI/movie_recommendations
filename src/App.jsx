@@ -24,36 +24,21 @@ const Headers = () => {
 
             let url = "";
             if (query.trim() === "") {
-                url = `${API_BASE}/discover/movie?include_adult=false&page=1`;
+                url = `${API_BASE}/discover/movie?page=1`;
             } else {
-                const keywords = query.trim().split(/\s+/).join("+"); // OR logic
+                const keywords = query.trim().split(/\s+/).join("+");
                 url = `${API_BASE}/search/movie?query=${keywords}&include_adult=false&page=1`;
             }
 
             const response = await fetch(url, options);
-            if (!response.ok) {
-                throw Error(`Could not find movies for ${url}`);
-            }
-
             const json_response = await response.json();
             let results = json_response.results || [];
-
-            if (query.trim() !== "") {
-                const words = query.toLowerCase().split(/\s+/);
-                results = results.filter((movie) =>
-                    words.every(
-                        (w) =>
-                            movie.title?.toLowerCase().includes(w) ||
-                            movie.overview?.toLowerCase().includes(w)
-                    )
-                );
-            }
 
             if (results.length === 0) {
                 setError("No movies found");
                 setMovies([]);
             } else {
-                setMovies(results);
+                setMovies(results);   // ✅ just use TMDB response directly
             }
         } catch (error) {
             setError("Error in fetching movies");
@@ -62,10 +47,11 @@ const Headers = () => {
         }
     };
 
+
     useEffect(() => {
         fetchMovies();
-
     }, []);
+
 
     useEffect(() => {
         if (search === "") {
@@ -73,8 +59,8 @@ const Headers = () => {
         } else {
             const timeout = setTimeout(() => {
                 fetchMovies(search);
-            }, 600);
-            return () => clearTimeout(timeout);
+            }, 1000);
+
         }
     }, [search]);
 
@@ -100,11 +86,8 @@ const Headers = () => {
                                     <li key={movie.id} className="movie-card">
                                         <img
                                             src={
-                                                movie.poster_path
-                                                    ? "https://image.tmdb.org/t/p/w500" +
-                                                    movie.poster_path
-                                                    : "./no-poster.png"
-                                            }
+                                                 "https://image.tmdb.org/t/p/w500" +
+                                                    movie.poster_path}
                                             alt={movie.title}
                                         />
                                         <h3>{movie.title}</h3>
